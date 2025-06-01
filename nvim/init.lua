@@ -1,3 +1,7 @@
+-- Add LuaRocks paths so Neovim can find lyaml
+package.path = package.path .. ";/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua"
+package.cpath = package.cpath .. ";/usr/local/lib/lua/5.1/?.so"
+
 -- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -24,6 +28,7 @@ require("lazy").setup({
   { "nvim-telescope/telescope-file-browser.nvim", dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" } },
   { "navarasu/onedark.nvim", priority = 1000, lazy = false },
   { "scottmckendry/cyberdream.nvim", lazy = false, priority = 1000, },
+  { "olimorris/codecompanion.nvim", opts = {}, dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" } },
 })
 
 require('nvim-web-devicons').setup()
@@ -133,5 +138,29 @@ vim.cmd.colorscheme("cyberdream")
 
 -- Syncing
 vim.keymap.set("n", "<leader>sync", ":Lazy sync<CR>", { desc = "Run Lazy sync" })
+
+-- Code companion 
+vim.api.nvim_set_keymap('n', '<leader>cca', ':CodeCompanionAction<CR>', { noremap = true, silent = true })
+
+require("codecompanion").setup({
+  strategies = {
+    chat = {
+      adapter = "openai",
+    },
+    inline = {
+      adapter = "openai",
+    },
+  },
+  adapters = {
+    openai = function()
+      return require("codecompanion.adapters").extend("openai", {
+        env = {
+          api_key = "cmd:cat ~/.config/nvim/tokens/openai.token",
+        },
+      })
+    end,
+    copilot = nil,
+  },
+})
 
 -- Terminal
