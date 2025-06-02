@@ -115,6 +115,32 @@ vim.keymap.set("n", "<leader>fb", function()
 
       map("n", "t", open_terminal_in_selection)
 
+      local actions = require("telescope.actions")
+      local action_state = require("telescope.actions.state")
+
+      -- Custom <CR> behavior
+      map("i", "<CR>", function()
+        local entry = action_state.get_selected_entry()
+        local path = entry and (entry.path or entry.value)
+        if path and path:match("%.pdf$") then
+          vim.fn.jobstart({ "zathura", path }, { detach = true })
+          actions.close(prompt_bufnr)
+        else
+          actions.select_default(prompt_bufnr)
+        end
+      end)
+
+      map("n", "<CR>", function()
+        local entry = action_state.get_selected_entry()
+        local path = entry and (entry.path or entry.value)
+        if path and path:match("%.pdf$") then
+          vim.fn.jobstart({ "zathura", path }, { detach = true })
+          actions.close(prompt_bufnr)
+        else
+          actions.select_default(prompt_bufnr)
+        end
+      end)
+
       return true
     end,
   })
@@ -123,7 +149,23 @@ end, { desc = "File browser with terminal on 't'" })
 
 
 -- NvimTree
-require("nvim-tree").setup({})
+require("nvim-tree").setup({
+  on_attach = function(bufnr)
+    local api = require("nvim-tree.api")
+
+    local function custom_open()
+      local node = api.tree.get_node_under_cursor()
+      if node and node.name:match("%.pdf$") then
+        vim.fn.jobstart({ "zathura", node.absolute_path }, { detach = true })
+      else
+        api.node.open.edit()
+      end
+    end
+
+    -- Override the default `<CR>` behavior
+    vim.keymap.set("n", "<CR>", custom_open, { buffer = bufnr, noremap = true, silent = true })
+  end
+})
 vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeToggle<cr>")
 
 -- Onedark Color Scheme
