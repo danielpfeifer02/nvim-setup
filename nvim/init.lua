@@ -29,6 +29,13 @@ require("lazy").setup({
   { "navarasu/onedark.nvim", priority = 1000, lazy = false },
   { "scottmckendry/cyberdream.nvim", lazy = false, priority = 1000, },
   { "olimorris/codecompanion.nvim", opts = {}, dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" } },
+  { "folke/noice.nvim", event = "VeryLazy", opts = {}, dependencies = {
+    -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+    "MunifTanjim/nui.nvim",
+    -- OPTIONAL:
+    -- `nvim-notify` is only needed, if you want to use the notification view.
+    -- If not available, we use `mini` as the fallback
+    "rcarriga/nvim-notify" } },
 })
 
 require('nvim-web-devicons').setup()
