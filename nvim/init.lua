@@ -36,6 +36,7 @@ require("lazy").setup({
     -- `nvim-notify` is only needed, if you want to use the notification view.
     -- If not available, we use `mini` as the fallback
     "rcarriga/nvim-notify" } },
+  { "hrsh7th/cmp-cmdline" },
 })
 
 require('nvim-web-devicons').setup()
@@ -69,6 +70,8 @@ cmp.setup({
   }
 })
 
+vim.keymap.set("n", "<leader>nd", "<cmd>NoiceDismiss<CR>", {desc = "Dismiss Noice Message"})
+
 -- Telescope keybindings
 -- require("telescope").setup({})
 -- vim.keymap.set("n", "<leader>ff", ":Telescope file_browser hidden=true<CR>")
@@ -81,6 +84,8 @@ require("telescope").setup({
     },
   },
 })
+
+require("telescope").load_extension("noice")
 
 vim.keymap.set("n", "<leader>ff", ":Telescope file_browser hidden=true<CR>")
 
@@ -213,3 +218,31 @@ require("codecompanion").setup({
 })
 
 -- Terminal
+
+-- Autocomplete
+
+
+
+-- `/` cmdline setup.
+cmp.setup.cmdline('/', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = 'buffer' }
+  }
+})
+
+-- `:` cmdline setup.
+cmp.setup.cmdline(':', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({
+    { name = 'path' }
+  }, {
+    {
+      name = 'cmdline',
+      option = {
+        ignore_cmds = { 'Man', '!' }
+      }
+    }
+  })
+})
+
