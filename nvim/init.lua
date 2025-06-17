@@ -2,6 +2,11 @@
 package.path = package.path .. ";/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua"
 package.cpath = package.cpath .. ";/usr/local/lib/lua/5.1/?.so"
 
+vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = "*",
+    command = "silent! lcd %:p:h",
+})
+
 -- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -29,14 +34,13 @@ require("lazy").setup({
   { "navarasu/onedark.nvim", priority = 1000, lazy = false },
   { "scottmckendry/cyberdream.nvim", lazy = false, priority = 1000, },
   { "olimorris/codecompanion.nvim", opts = {}, dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" } },
-  --[[ { "folke/noice.nvim", event = "VeryLazy", opts = {}, dependencies = {
+  { "folke/noice.nvim", event = "VeryLazy", opts = {}, dependencies = {
     -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
     "MunifTanjim/nui.nvim",
     -- OPTIONAL:
     -- `nvim-notify` is only needed, if you want to use the notification view.
     -- If not available, we use `mini` as the fallback
-    "rcarriga/nvim-notify" } },
-    ]]
+    "rcarriga/nvim-notify" } },  
   { "hrsh7th/cmp-cmdline" },
 
   {
@@ -133,7 +137,7 @@ require("lazy").setup({
     { "<leader>ss", function() Snacks.picker.lsp_symbols() end, desc = "LSP Symbols" },
     { "<leader>sS", function() Snacks.picker.lsp_workspace_symbols() end, desc = "LSP Workspace Symbols" },
     -- Other
-    { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },
+    -- { "<leader>z",  function() Snacks.zen() end, desc = "Toggle Zen Mode" },
     { "<leader>Z",  function() Snacks.zen.zoom() end, desc = "Toggle Zoom" },
     { "<leader>.",  function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
     { "<leader>S",  function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
@@ -205,6 +209,10 @@ vim.o.number = true
 vim.o.relativenumber = true
 vim.opt.termguicolors = true
 
+vim.opt.tabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.expandtab = true
+
 -- LSP setup
 require("mason").setup()
 require("mason-lspconfig").setup({
@@ -232,11 +240,11 @@ cmp.setup({
 -- vim.keymap.set("n", "<leader>nd", "<cmd>NoiceDismiss<CR>", {desc = "Dismiss Noice Message"})
 
 -- Telescope keybindings
--- require("telescope").setup({})
+require("telescope").setup({})
 -- vim.keymap.set("n", "<leader>ff", ":Telescope file_browser hidden=true<CR>")
--- vim.keymap.set("n", "<leader>fb", ":Telescope file_browser path=%:p:h select_buffer=true hidden=true<CR>")
+-- vim.keymap.set("n", "<leader>tfb", ":Telescope file_browser path=%:p:h select_buffer=true hidden=true<CR>")
 
---[[
+
 require("telescope").setup({
   extensions = {
     file_browser = {
@@ -247,10 +255,10 @@ require("telescope").setup({
 
 require("telescope").load_extension("noice")
 
-vim.keymap.set("n", "<leader>ff", ":Telescope file_browser hidden=true<CR>")
+-- vim.keymap.set("n", "<leader>ff", ":Telescope file_browser hidden=true<CR>")
 
 -- Enhanced version: opens in current file's directory and adds 't' keybinding
-vim.keymap.set("n", "<leader>fb", function()
+vim.keymap.set("n", "<leader>fe", function()
   require("telescope").extensions.file_browser.file_browser({
     path = "%:p:h",
     select_buffer = true,
@@ -317,7 +325,7 @@ vim.keymap.set("n", "<leader>fb", function()
     end,
   })
 end, { desc = "File browser with terminal on 't'" })
-]]
+--]]
 
 
 -- NvimTree
@@ -405,4 +413,15 @@ cmp.setup.cmdline(':', {
     }
   })
 })
+
+-- Zeal
+vim.api.nvim_create_user_command("Zeal", function(opts)
+  local query = opts.args ~= "" and opts.args or vim.fn.expand("<cword>")
+  vim.fn.jobstart({ "zeal", query }, { detach = true })
+end, {
+  nargs = "*",
+  desc = "Open Zeal with the given query (or word under cursor)",
+})
+
+vim.keymap.set("n", "<leader>z", "<cmd>Zeal<cr>", { desc = "Search word in Zeal" })
 
